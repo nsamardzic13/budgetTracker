@@ -1,0 +1,6 @@
+# venv
+.venv
+
+# credentials
+service_account.json
+email_credentials.json
