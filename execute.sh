@@ -2,9 +2,6 @@
 
 set -eo pipefail
 
-# fake cicd :)
-git pull 
-
 TODAY=$(date +%Y-%m-%d)
 HTML_FILE="output.html"
 IPYNB_FILE="main.ipynb"
