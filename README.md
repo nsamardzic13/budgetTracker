@@ -28,5 +28,3 @@ To install all the dependencies, use standard:
 `pip install poetry `
 
 Finally, make sure to adjust values in config.json
-
-## Scrape data
