@@ -2,6 +2,9 @@
 
 set -eo pipefail
 
+NOW=$(date)
+echo "Script started @ ${NOW}"
+
 TODAY=$(date +%Y-%m-%d)
 HTML_FILE="output.html"
 IPYNB_FILE="main.ipynb"
@@ -12,3 +15,6 @@ jupyter nbconvert --output ${HTML_FILE}  --no-input --to=HTML --execute ${IPYNB_
 python send_email.py --subject "${SUBJECT}" --filename "${HTML_FILE}"
 
 rm -f ${HTML_FILE}
+
+NOW=$(date)
+echo "Script ended @ ${NOW}"
