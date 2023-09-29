@@ -4,3 +4,7 @@
 # credentials
 service_account.json
 email_credentials.json
+
+# credentials
+GCP/service_account.json
+GCP/email_credentials.json
