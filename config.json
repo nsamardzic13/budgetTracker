@@ -1,0 +1,11 @@
+{
+    "gSheetName": "BudgetTracker",
+    "sheetNames": [
+        "Erste",
+        "Keks",
+        "Cash",
+        "Revolut"
+    ],
+    "serviceName": "service_account",
+    "regionName": "us-east-1"
+}
