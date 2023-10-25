@@ -1,0 +1,14 @@
+{
+    "gSheetName": "BudgetTracker",
+    "sheetNames": [
+        "Erste",
+        "Keks",
+        "Cash",
+        "Revolut"
+    ],
+    "serviceName": "service_account",
+    "regionName": "us-east-1",
+    "spendingsImg": "spendings.png",
+    "trendImg": "trend.png",
+    "spendingsCurrentMonthImg": "spending_current_month.png"
+}
