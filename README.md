@@ -29,20 +29,18 @@ To install all the dependencies, use standard:
 
 Finally, make sure to adjust values in config.json
 
-
 Poetry has too many packages, some are needed for GCP version, others for AWS. Cleanup will be done in the future.
 
-
-## AWS 
+## AWS
 
 AWS version of the solution is the main one. It is using Infrastructure as a Code in Terraform in adition to custom python scripts. Keep in mind service_account.json content is stored as a part of SM.
 
 To refresh code of AWS Glue in case any of the code files is updated, use following tf command:
 
 ```
-terraform apply -replace aws_s3_object.tf_budget_tracker_bucket_object_main \
-                -replace aws_s3_object.tf_budget_tracker_bucket_object_helper \
-                -replace aws_s3_object.tf_budget_tracker_bucket_object_config\
-                -replace aws_s3_object.tf_budget_tracker_bucket_object_email
-
+terraform apply \
+-replace aws_s3_object.tf_budget_tracker_bucket_object_main \
+-replace aws_s3_object.tf_budget_tracker_bucket_object_helper \
+-replace aws_s3_object.tf_budget_tracker_bucket_object_config \
+-replace aws_s3_object.tf_budget_tracker_bucket_object_email
 ```
