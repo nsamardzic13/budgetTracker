@@ -30,7 +30,7 @@ def main():
     df_spendings = budget_tracker.get_spendings(img_name=config['spendingsImg'])
     budget_tracker.get_trend(img_name=config['trendImg'])
     df_cumsum_month = budget_tracker.get_cumsum_month()
-    budget_tracker.get_spendings_current_month(img_name=config['spendingsCurrentMonthImg'])
+    df_current_month = budget_tracker.get_spendings_current_month(img_name=config['spendingsCurrentMonthImg'])
 
     # construct email
     html = """
@@ -48,8 +48,10 @@ def main():
         {{ df_cumsum_month }}
         <br>
 
-        <h1>Spendings Cumsum Month</h1>
+        <h1>Spendings Current Month</h1>
         {{ img_spendings_current_month }}
+        <br>
+        {{ df_current_month }}
         <br>
     """
 
@@ -61,7 +63,8 @@ def main():
 
     tables = {
         'df_spendings': df_spendings,
-        'df_cumsum_month': df_cumsum_month
+        'df_cumsum_month': df_cumsum_month,
+        'df_current_month': df_current_month
     }
 
     email.send_email(

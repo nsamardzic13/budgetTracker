@@ -175,3 +175,5 @@ class BudgetTracker:
             labels=df_category['TYPE']
         ))
         fig.write_image(img_name)
+
+        return df_category
