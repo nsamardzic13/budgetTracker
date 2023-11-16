@@ -167,7 +167,7 @@ class BudgetTracker:
         df_category = self.df[(self.df['YEAR'] == self.current_year) & (self.df['MONTH'] == self.current_month) & (self.df['AMOUNT'] < 0)].groupby('TYPE')['AMOUNT'].sum().reset_index()
         df_category['AMOUNT'] = df_category['AMOUNT'] * -1
 
-        df_category.sort_values(by='AMOUNT', ascending=False).reset_index(drop=True)
+        df_category = df_category.sort_values(by='AMOUNT', ascending=False).reset_index(drop=True)
 
         fig = go.Figure()
         fig.add_trace(go.Pie(
