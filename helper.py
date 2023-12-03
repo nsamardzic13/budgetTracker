@@ -104,8 +104,8 @@ class BudgetTracker:
         df = pd.concat(df_list)
 
         df = df[df['TYPE'] != 'Transfer']
-        df['YEAR'] = df['DATE'].str[:4].astype(int)
-        df['MONTH'] = df['DATE'].str[5:7].astype(int)
+        df['YEAR'] = df['DATE'].str.split('-')[0].astype(int)
+        df['MONTH'] = df['DATE'].str.split('-')[1].astype(int)
         df.sort_values(by=['DATE'], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
