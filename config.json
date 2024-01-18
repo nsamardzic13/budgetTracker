@@ -1,10 +1,12 @@
 {
-    "gSheetName": "BudgetTracker",
-    "sheetNames": [
-        "Erste",
-        "Keks",
-        "Cash",
-        "Revolut"
+    "gSheetNames": [
+        "BudgetTracker"
+    ],
+    "targetEmails": [
+        "nikola.samardzic1997@gmail.com"
+    ],
+    "excludeSheetNames": [
+        "TypeList"
     ],
     "serviceName": "google-service-account",
     "regionName": "eu-central-1",

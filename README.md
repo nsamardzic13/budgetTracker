@@ -35,6 +35,8 @@ Poetry has too many packages, some are needed for GCP version, others for AWS. C
 
 AWS version of the solution is the main one. It is using Infrastructure as a Code in Terraform in adition to custom python scripts. Keep in mind service_account.json content is stored as a part of SM.
 
+Vairables file is not added to Git, so you have to add it locally.
+
 To refresh code of AWS Glue in case any of the code files is updated, use following tf command:
 
 ```

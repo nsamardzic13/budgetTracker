@@ -31,8 +31,10 @@ gmail_credentials = read_file(file_name='email_credentials.json')
 
 class Email:
 
-    def __init__(self) -> None:
-        self.email = EmailSender(
+    def __init__(self, email_to: str) -> None:
+        self.email_to = email_to
+
+        self._email = EmailSender(
             host=gmail_credentials['host'],
             port=gmail_credentials['port'],
             username=gmail_credentials['smtpUser'],
@@ -40,32 +42,34 @@ class Email:
         )
 
         tdy = datetime.now().strftime('%Y-%m-%d')
-        self.subject = f'Budget Report for {tdy}'
+        self._subject = f'Budget Report for {tdy}'
 
     def send_email(self, html: str, plots: dict, tables: dict) -> None:
         try:
-            self.email.send(
-                subject=self.subject,
+            self._email.send(
+                subject=self._subject,
                 sender=gmail_credentials['from'],
-                receivers=gmail_credentials['to'],
+                receivers=self.email_to,
                 html=html,
                 body_images=plots,
                 body_tables=tables
             )
-            print('Email sent successfully')
+            print(f'Email sent successfully to {self.email_to}')
         except Exception as e:
-            print(f'Email sending failed: {e}')
+            print(f'Email sending to {self.email_to} failed: {e}')
             raise
 
 
 class BudgetTracker:
 
-    def __init__(self) -> None:
-        self.df = self.get_data()
-        self.current_month = int(datetime.now().strftime('%m'))
-        self.current_year = int(datetime.now().strftime('%Y'))
+    def __init__(self, sheet_name: str) -> None:
+        self.sheet_name = sheet_name
 
-    def get_secret(self) -> dict:
+        self._df = self._get_data()
+        self._current_month = int(datetime.now().strftime('%m'))
+        self._current_year = int(datetime.now().strftime('%Y'))
+
+    def _get_secret(self) -> dict:
         secret_name = config['serviceName']
         region_name = config['regionName']
 
@@ -89,14 +93,16 @@ class BudgetTracker:
 
         return secret_dict
     
-    def get_data(self) -> pd.DataFrame:
-        gc = gspread.service_account_from_dict(self.get_secret())
+    def _get_data(self) -> pd.DataFrame:
+        gc = gspread.service_account_from_dict(self._get_secret())
         file = gc.open(
-            title=config['gSheetName']
+            title=self.sheet_name
         )
 
         df_list = []
-        for sheet in config['sheetNames']:
+        workshet_list = file.worksheets()
+        workshet_list = [x.title for x in workshet_list if x.title not in config['excludeSheetNames']]
+        for sheet in workshet_list:
             curr_sheet = file.worksheet(sheet)
             curr_df = pd.DataFrame(curr_sheet.get_all_records(head=3))
             df_list.append(curr_df)
@@ -113,7 +119,7 @@ class BudgetTracker:
 
     def get_spendings(self, img_name: str) -> pd.DataFrame:
         ## Spending per Month
-        df_spendings = self.df[self.df['AMOUNT'] < 0].groupby(['YEAR', 'MONTH'])['AMOUNT'].sum().reset_index().tail(12)
+        df_spendings = self._df[self._df['AMOUNT'] < 0].groupby(['YEAR', 'MONTH'])['AMOUNT'].sum().round(2).reset_index().tail(12)
 
         fig = go.Figure()
         fig.add_trace(go.Bar(
@@ -124,22 +130,21 @@ class BudgetTracker:
             textposition='auto'
         ))
         fig.write_image(img_name)
-
         return df_spendings
 
     def get_trend(self, img_name: str) -> None:
-        self.df['TREND'] = self.df['AMOUNT'].cumsum()
-        x = mdates.date2num(self.df['DATE'])
+        self._df['TREND'] = self._df['AMOUNT'].cumsum()
+        x = mdates.date2num(self._df['DATE'])
         z = np.polyfit(
             x, 
-            self.df['TREND'], 
+            self._df['TREND'], 
             1
         )
         p = np.poly1d(z)
 
-        self.df['TREND_VAL'] = p(x)
+        self._df['TREND_VAL'] = p(x)
 
-        df_trend = self.df.groupby(['DATE']).agg({'TREND': 'max', 'TREND_VAL': 'max'}).reset_index()
+        df_trend = self._df.groupby(['DATE']).agg({'TREND': 'max', 'TREND_VAL': 'max'}).reset_index()
         slope = np.round(
             z[0] / df_trend['TREND'].iloc[0] * 100,
             2
@@ -160,11 +165,11 @@ class BudgetTracker:
         fig.write_image(img_name)
 
     def get_cumsum_month(self) -> pd.DataFrame:
-        df_cumsum_month = self.df.groupby(['YEAR', 'MONTH'])['AMOUNT'].sum().groupby(level=0).cumsum().reset_index().tail(12)
+        df_cumsum_month = self._df.groupby(['YEAR', 'MONTH'])['AMOUNT'].sum().cumsum().round(2).reset_index().tail(12)
         return df_cumsum_month
 
     def get_spendings_current_month(self, img_name: str) -> None:
-        df_category = self.df[(self.df['YEAR'] == self.current_year) & (self.df['MONTH'] == self.current_month) & (self.df['AMOUNT'] < 0)].groupby('TYPE')['AMOUNT'].sum().reset_index()
+        df_category = self._df[(self._df['YEAR'] == self._current_year) & (self._df['MONTH'] == self._current_month) & (self._df['AMOUNT'] < 0)].groupby('TYPE')['AMOUNT'].sum().round(2).reset_index()
         df_category['AMOUNT'] = df_category['AMOUNT'] * -1
 
         df_category = df_category.sort_values(by='AMOUNT', ascending=False).reset_index(drop=True)

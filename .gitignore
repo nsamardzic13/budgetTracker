@@ -16,3 +16,6 @@ email_credentials.json
 
 # images
 *.png
+
+# tf variables
+variables.tf
