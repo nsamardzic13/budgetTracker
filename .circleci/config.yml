@@ -2,34 +2,56 @@
 # Stacks detected: deps:python:.,package_manager:poetry:.
 version: 2.1
 orbs:
-  python: circleci/python@2
+  python: circleci/python@2.1.1
+  aws-cli: circleci/aws-cli@4.1.3
+  terraform: circleci/terraform@3.2.1
+
 jobs:
-  test-python:
-    # Install dependencies and run tests
-    docker:
-      - image: cimg/python:>= 3.9, <= 3.11-node
+  aws-cli-cred-setup:
+    executor: aws-cli/default
     steps:
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION_NAME
+
+  terraform-plan:
+    executor: terraform/default
+    steps:
+      - aws-cli-cred-setup
       - checkout
-      - python/install-packages:
-          pkg-manager: poetry
       - run:
-          name: Run tests
-          command: poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
-      - store_test_results:
-          path: junit.xml
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Replace this with steps to deploy to users
+          name: Terraform Plan
+          command: |
+            cd ../infrastructure
+            terraform init
+            terraform plan -var "access_key=${AWS_ACCESS_KEY}" -var "secret_key=${AWS_ACCESS_SECRET}" -var "region=${AWS_REGION_NAME}"
+          no_output_timeout: 30m
+
+  terraform-apply:
+    executor: terraform/default
+      - aws-cli-cred-setup
+      - checkout
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Terraform Apply
+          command: |
+            cd ../infrastructure
+            terraform init
+            terraform apply -var "access_key=${AWS_ACCESS_KEY}" -var "secret_key=${AWS_ACCESS_SECRET}" -var "region=${AWS_REGION_NAME}" -auto-approve
+          no_output_timeout: 30m
+
 workflows:
-  build-and-test:
+  version: 2
+  terraform-workflow:
     jobs:
-      - test-python
-    # - deploy:
-    #     requires:
-    #       - test-python
+      - aws-cli-cred-setup
+        filters:
+          branches:
+            only:
+              - main
+      - terraform-plan:
+          requires:
+            - aws-cli-cred-setup
+      - terraform-apply:
+          requires:
+            - terraform-plan
