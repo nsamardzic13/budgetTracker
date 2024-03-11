@@ -22,10 +22,3 @@ resource "aws_s3_object" "tf_budget_tracker_bucket_object_config" {
   source = "../config.json"
   etag   = filemd5("../config.json")
 }
-
-resource "aws_s3_object" "tf_budget_tracker_bucket_object_email" {
-  bucket = aws_s3_bucket.tf_budget_tracker_bucket.id
-  key    = "email_credentials.json"
-  source = "../email_credentials.json"
-  etag   = filemd5("../email_credentials.json")
-}
