@@ -6,8 +6,8 @@ variable "project_name" {
 
 variable "additional_python_modules" {
   description = "Additional Python modules used in Glue"
-  type = list(string)
-  default = ["gspread","redmail","matplotlib","plotly","kaleido"]
+  type        = list(string)
+  default     = ["gspread", "redmail", "matplotlib", "plotly", "kaleido"]
 }
 
 variable "sns_email_address" {
