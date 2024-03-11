@@ -8,7 +8,8 @@
     "excludeSheetNames": [
         "TypeList"
     ],
-    "serviceName": "google-service-account",
+    "googleServiceSecret": "google-service-account",
+    "smtpServerSecret": "gmail_smtp_server",
     "regionName": "eu-central-1",
     "spendingsImg": "spendings.png",
     "trendImg": "trend.png",

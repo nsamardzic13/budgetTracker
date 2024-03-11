@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from botocore.exceptions import ClientError
 from redmail import EmailSender
 
+
 def read_file(file_name, bucket_name='tf-budget-tracker-bucket'):
     if os.path.exists(file_name):
         with open(file_name, 'r') as f:
@@ -26,53 +27,10 @@ def read_file(file_name, bucket_name='tf-budget-tracker-bucket'):
 
 # global data 
 config = read_file(file_name='config.json')
-gmail_credentials = read_file(file_name='email_credentials.json')
 
 
-class Email:
-
-    def __init__(self, email_to: str) -> None:
-        self.email_to = email_to
-
-        self._email = EmailSender(
-            host=gmail_credentials['host'],
-            port=gmail_credentials['port'],
-            username=gmail_credentials['smtpUser'],
-            password=gmail_credentials['password']
-        )
-
-        tdy = datetime.now().strftime('%Y-%m-%d')
-        self._subject = f'Budget Report for {tdy}'
-
-    def send_email(self, html: str, plots: dict, tables: dict) -> None:
-        try:
-            self._email.send(
-                subject=self._subject,
-                sender=gmail_credentials['from'],
-                receivers=self.email_to,
-                html=html,
-                body_images=plots,
-                body_tables=tables
-            )
-            print(f'Email sent successfully to {self.email_to}')
-        except Exception as e:
-            print(f'Email sending to {self.email_to} failed: {e}')
-            raise
-
-
-class BudgetTracker:
-
-    def __init__(self, sheet_name: str) -> None:
-        self.sheet_name = sheet_name
-
-        self._df = self._get_data()
-        self._current_month = int(datetime.now().strftime('%m'))
-        self._current_year = int(datetime.now().strftime('%Y'))
-
-    def _get_secret(self) -> dict:
-        secret_name = config['serviceName']
-        region_name = config['regionName']
-
+class AWS:
+    def _get_secret(self, secret_name: str, region_name: str) -> dict:
         # Create a Secrets Manager client
         session = boto3.session.Session()
         client = session.client(
@@ -92,9 +50,56 @@ class BudgetTracker:
         secret_dict = json.loads(secret)
 
         return secret_dict
+
+
+class Email(AWS):
+
+    def __init__(self, email_to: str) -> None:
+        self.email_to = email_to
+        gmail_credentials = self._get_secret(
+            secret_name=config['smtpServerSecret'],
+            region_name=config['regionName']
+        )
+        self._email = EmailSender(
+            host=gmail_credentials['host'],
+            port=gmail_credentials['port'],
+            username=gmail_credentials['smtpUser'],
+            password=gmail_credentials['password']
+        )
+
+        tdy = datetime.now().strftime('%Y-%m-%d')
+        self._subject = f'Budget Report for {tdy}'
+
+    def send_email(self, html: str, plots: dict, tables: dict) -> None:
+        try:
+            self._email.send(
+                subject=self._subject,
+                sender='budgetTracket@gmail.com',
+                receivers=self.email_to,
+                html=html,
+                body_images=plots,
+                body_tables=tables
+            )
+            print(f'Email sent successfully to {self.email_to}')
+        except Exception as e:
+            print(f'Email sending to {self.email_to} failed: {e}')
+            raise
+
+
+class BudgetTracker(AWS):
+
+    def __init__(self, sheet_name: str) -> None:
+        self.sheet_name = sheet_name
+
+        self._df = self._get_data()
+        self._current_month = int(datetime.now().strftime('%m'))
+        self._current_year = int(datetime.now().strftime('%Y'))
     
     def _get_data(self) -> pd.DataFrame:
-        gc = gspread.service_account_from_dict(self._get_secret())
+        gc = gspread.service_account_from_dict(self._get_secret(
+            secret_name=config['googleServiceSecret'],
+            region_name=config['regionName']
+        ))
         file = gc.open(
             title=self.sheet_name
         )
