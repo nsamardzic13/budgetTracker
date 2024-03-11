@@ -17,7 +17,7 @@ resource "aws_glue_job" "tf_budget_tracker_glue" {
 resource "aws_glue_trigger" "tf_budget_tracker_glue_trigger" {
   name     = "tf-budget-tracker-glue-trigger"
   type     = "SCHEDULED"
-  schedule = "cron(00 07 ? * MON *)"
+  schedule = "cron(00 08 ? * MON *)"
 
   actions {
     job_name = aws_glue_job.tf_budget_tracker_glue.name
