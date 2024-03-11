@@ -9,7 +9,7 @@ resource "aws_glue_job" "tf_budget_tracker_glue" {
     python_version  = "3.9"
   }
   default_arguments = {
-    "--additional-python-modules" : "gspread,redmail,matplotlib,plotly,kaleido"
+    "--additional-python-modules" : length(var.additional_python_modules) > 0 ? join(",", var.additional_python_modules) : null
     "--extra-py-files" : "s3://${aws_s3_bucket.tf_budget_tracker_bucket.bucket}/helper.py"
   }
 }

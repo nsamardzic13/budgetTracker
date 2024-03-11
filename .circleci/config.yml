@@ -8,13 +8,19 @@ workflows:
           path: ./infrastructure
           checkout: true
           context: terraform
+      - terraform/validate:
+          path: ./infrastructure
+          checkout: true
+          context: terraform
+          requires:
+            - terraform/fmt
       - terraform/plan:
           path: ./infrastructure
           checkout: true
           context: terraform
           persist-workspace: true
           requires:
-            - terraform/fmt
+            - terraform/validate
       - terraform/apply:
           path: ./infrastructure
           attach-workspace: true
