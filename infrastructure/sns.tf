@@ -2,11 +2,11 @@ resource "aws_cloudwatch_event_rule" "tf_glue_job_failure_rule" {
   name        = "tf-glue-job-failure-rule"
   description = "Trigger on Glue job state changes"
   event_pattern = jsonencode({
-    source = ["aws.glue"],
+    source      = ["aws.glue"],
     detail-type = ["Glue Job State Change"],
     detail = {
-        "jobName": ["${aws_glue_job.tf_budget_tracker_glue.name}"],
-        "state": ["FAILED", "ERROR", "STOPPED"]
+      "jobName" : ["${aws_glue_job.tf_budget_tracker_glue.name}"],
+      "state" : ["FAILED", "ERROR", "STOPPED"]
     }
   })
 }
