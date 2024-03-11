@@ -1,56 +1,32 @@
-version: 2.1
+version: '2.1'
 orbs:
-  python: circleci/python@2.1.1
-  aws-cli: circleci/aws-cli@2.1.0
-  terraform: circleci/terraform@3.2.1
-
-jobs:
-  aws-cli-cred-setup:
-    executor: aws-cli/default
-    steps:
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY
-          aws-secret-access-key: AWS_ACCESS_SECRET
-          aws-region: AWS_REGION_NAME
-
-  terraform-plan:
-    executor: terraform/default
-    steps:
-      - aws-cli-cred-setup
-      - checkout
-      - run:
-          name: Terraform Plan
-          command: |
-            cd ../infrastructure
-            terraform init
-            terraform plan -var "access_key=${AWS_ACCESS_KEY}" -var "secret_key=${AWS_ACCESS_SECRET}" -var "region=${AWS_REGION_NAME}"
-          no_output_timeout: 30m
-
-  terraform-apply:
-    executor: terraform/default
-    steps:
-      - aws-cli-cred-setup
-      - checkout
-      - run:
-          name: Terraform Apply
-          command: |
-            cd ../infrastructure
-            terraform init
-            terraform apply -var "access_key=${AWS_ACCESS_KEY}" -var "secret_key=${AWS_ACCESS_SECRET}" -var "region=${AWS_REGION_NAME}" -auto-approve
-          no_output_timeout: 30m
-
+  terraform: circleci/terraform@3.1
 workflows:
-  version: 2
-  terraform-workflow:
+  deploy_infrastructure:
     jobs:
-      - aws-cli-cred-setup:
+      - terraform/fmt:
+          path: ./infrastructure
+          checkout: true
+          context: terraform
+      - terraform/validate:
+          path: ./infrastructure
+          checkout: true
+          context: terraform
+          requires:
+            - terraform/fmt
+      - terraform/plan:
+          path: ./infrastructure
+          checkout: true
+          context: terraform
+          persist-workspace: true
+          requires:
+            - terraform/validate
+      - terraform/apply:
+          path: ./infrastructure
+          attach-workspace: true
+          context: terraform
           filters:
             branches:
-              only:
-                - main
-      - terraform-plan:
+              only: main
           requires:
-            - aws-cli-cred-setup
-      - terraform-apply:
-          requires:
-            - terraform-plan
+            - terraform/plan
