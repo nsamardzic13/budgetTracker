@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "tf_budget_tracker_bucket" {
-  bucket = "tf-budget-tracker-bucket"
+  bucket = "${var.project_name}-bucket"
 }
 
 resource "aws_s3_object" "tf_budget_tracker_bucket_object_main" {
