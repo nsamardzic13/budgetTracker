@@ -12,7 +12,7 @@ resource "aws_cloudwatch_event_rule" "tf_glue_job_failure_rule" {
 }
 
 resource "aws_sns_topic" "tf_budget_tracker_glue_sns" {
-  name = "${tf-budgettracker}-glue-sns"
+  name = "${var.project_name}-glue-sns"
 }
 
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
