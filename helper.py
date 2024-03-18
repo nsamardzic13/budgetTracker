@@ -12,7 +12,7 @@ from botocore.exceptions import ClientError
 from redmail import EmailSender
 
 
-def read_file(file_name, bucket_name='tf-budget-tracker-bucket'):
+def read_file(file_name, bucket_name='tf-budgettracker-bucket'):
     if os.path.exists(file_name):
         with open(file_name, 'r') as f:
             data = json.load(f)
