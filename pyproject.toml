@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["nsamardzic13 <nikola.samardzic1997@gmail.com>"]
 readme = "README.md"
-packages = [{include = "budget_tracker"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12"
