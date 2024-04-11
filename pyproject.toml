@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "035-gsheet"
+name = "budget_tracker"
 version = "0.1.0"
 description = ""
 authors = ["nsamardzic13 <nikola.samardzic1997@gmail.com>"]
 readme = "README.md"
-packages = [{include = "035_gsheet"}]
+packages = [{include = "budget_tracker"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12"
@@ -17,8 +17,12 @@ redmail = "^0.6.0"
 matplotlib = "^3.8.3"
 kaleido = "0.2.1"
 pytest = "^8.1.1"
+pylint = {extras = ["spelling"], version = "^3.1.0"}
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.message_control]
+disable=["too-few-public-methods"]

@@ -1,39 +1,26 @@
-import os
-import json
-import boto3
+"""
+Main script
+"""
+from .helper import BudgetTracker, Email, config
 
-from helper import BudgetTracker, Email
-
-
-def read_file(file_name, bucket_name='tf-budgettracker-bucket'):
-    if os.path.exists(file_name):
-        with open(file_name, 'r') as f:
-            data = json.load(f)
-    else:
-        # set user - hotflix for 'getpwuid(): uid not found: 10000'
-        os.environ['USER'] = 'GlueUser'
-        s3 = boto3.client('s3')
-        response = s3.get_object(Bucket=bucket_name, Key=file_name)
-
-        # Parse the JSON data
-        data = json.loads(response['Body'].read().decode('utf-8'))
-
-    return data
-
-# global data 
-config = read_file(file_name='config.json')
 
 def main():
-
+    """
+    Executing main 
+    """
     for sheet_name, email_to in zip(config['gSheetNames'], config['targetEmails']):
         print(f'Starting {sheet_name} for {email_to}')
         email = Email(email_to=email_to)
         budget_tracker = BudgetTracker(sheet_name=sheet_name)
 
-        df_spendings = budget_tracker.get_spendings(img_name=config['spendingsImg'])
+        df_spendings = budget_tracker.get_spendings(
+            img_name=config['spendingsImg']
+        )
         budget_tracker.get_trend(img_name=config['trendImg'])
         df_cumsum_month = budget_tracker.get_cumsum_month()
-        df_current_month = budget_tracker.get_spendings_current_month(img_name=config['spendingsCurrentMonthImg'])
+        df_current_month = budget_tracker.get_spendings_current_month(
+            img_name=config['spendingsCurrentMonthImg']
+        )
 
         # construct email
         html = """
