@@ -10,12 +10,10 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          args: pylint
-          pkg-manager: pip
-          pypi-cache: false
+          pkg-manager: poetry
       - run:
           command: |
-            pylint .
+            poetry run pylint .
           name: Testing with pylint
 
 workflows:
